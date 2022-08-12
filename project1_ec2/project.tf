@@ -31,6 +31,16 @@ resource "aws_vpc" "vpc" {
   enable_dns_hostnames = true
 }
 
+resource "aws_subnet" "private-subnet" {
+  vpc_id            = aws_vpc.vpc.id
+  cidr_block        = var.private_subnet_cidr
+  availability_zone = var.aws_az
+
+  tags = {
+    name = "Private Subnet"
+  }
+}
+
 resource "aws_subnet" "public-subnet" {
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = var.public_subnet_cidr
@@ -54,6 +64,7 @@ resource "aws_route_table" "public-rt" {
   }
 }
 
+# this makes the subnet public
 resource "aws_route_table_association" "public-rt-association" {
   subnet_id      = aws_subnet.public-subnet.id
   route_table_id = aws_route_table.public-rt.id
@@ -112,7 +123,7 @@ resource "aws_security_group" "aws-linux-sg" {
 
 # ---
 
-resource "aws_iam_role" "test_role" {
+resource "aws_iam_role" "ec2_role" {
   name = "test_role"
 
   assume_role_policy = <<EOF
@@ -132,9 +143,9 @@ resource "aws_iam_role" "test_role" {
 EOF
 }
 
-resource "aws_iam_role_policy" "test_policy" {
-  name = "test_policy"
-  role = aws_iam_role.test_role.id
+resource "aws_iam_role_policy" "ec2_policy" {
+  name = "ec2_policy"
+  role = aws_iam_role.ec2_role.id
 
   policy = <<EOF
 {
@@ -152,9 +163,9 @@ resource "aws_iam_role_policy" "test_policy" {
 EOF
 }
 
-resource "aws_iam_instance_profile" "test_profile" {
-  name = "test_profile"
-  role = aws_iam_role.test_role.name
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "ec2_profile"
+  role = aws_iam_role.ec2_role.name
 }
 
 # ---
@@ -169,7 +180,9 @@ resource "aws_instance" "linux-server" {
   subnet_id                   = aws_subnet.public-subnet.id
   associate_public_ip_address = var.linux_associate_public_ip_address
   vpc_security_group_ids      = [aws_security_group.aws-linux-sg.id]
-  iam_instance_profile        = aws_iam_instance_profile.test_profile.name
+  iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
+
+  # bash: lsblk
 
   # root disk
   root_block_device {
@@ -179,9 +192,9 @@ resource "aws_instance" "linux-server" {
     encrypted             = true
   }
 
-  # extra disk
+  # extra disk - https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/device_naming.html
   ebs_block_device {
-    device_name           = "/dev/xvda"
+    device_name           = "/dev/xvdb"
     volume_size           = var.linux_data_volume_size
     volume_type           = var.linux_data_volume_type
     encrypted             = true

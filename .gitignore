@@ -1,5 +1,6 @@
 *.pem
 *.tfstate
 *.tfstate.backup
+*.tfstate.lock.info
 .idea
 .terraform

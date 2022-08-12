@@ -10,6 +10,12 @@ variable "vpc_cidr" {
   default     = "10.1.64.0/18"
 }
 
+variable "private_subnet_cidr" {
+  type        = string
+  description = "CIDR for the private subnet"
+  default     = "10.1.65.0/24"
+}
+
 variable "public_subnet_cidr" {
   type        = string
   description = "CIDR for the public subnet"
@@ -31,13 +37,13 @@ variable "linux_associate_public_ip_address" {
 variable "linux_root_volume_size" {
   type        = number
   description = "Volume size of root volume of Linux Server"
-  default     = 10
+  default     = 8
 }
 
 variable "linux_data_volume_size" {
   type        = number
   description = "Volume size of data volume of Linux Server"
-  default     = 10
+  default     = 12
 }
 
 variable "linux_root_volume_type" {
