@@ -1,0 +1,1 @@
+aws sqs send-message --queue-url https://sqs.us-west-2.amazonaws.com/732264153360/product_visits_data_queue --message-body '{"ProductId": "c96b4974545acc545d", "ProductName": "Gloves", "PricePerUnit": "10", "CustomerId": "be6612ea36b90aec", "CustomerName": "John Doe"}'
